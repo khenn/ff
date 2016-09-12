@@ -1,0 +1,103 @@
+DK Team 1
+Aaron Rodgers
+Darren McFadden
+Brandon LaFell
+Eagles
+DeAngelo Williams
+Jordan Reed
+DeMarco Murray
+Randall Cobb
+Allen Robinson
+
+DK Team 2
+Blake Bortles
+DeAngelo Williams
+Allen Hurns
+DeMarco Murray
+Travis Benjamin
+Demaryius Thomas
+Brandin Cooks
+Martellus Bennett
+Dolphins
+
+DK Team 3
+Tom Brady
+DeAngelo Williams
+James Starks
+Michael Crabtree
+Allen Robinson
+Tyler Eifert
+LeGarrette Blount
+Marques Colston
+Bengals
+
+DK Team 4
+James Starks
+Andy Dalton
+LaMar Miller
+Michael Crabtree
+Jordan Reed
+A.J. Green
+Adrian Peterson
+Pierre Garcon
+Pakcers
+
+DK Team 5
+Darren McFadden
+Brandon LaFell
+Mark Ingram
+Kirk Cousins
+DeMarco Murray
+Amari Cooper
+Gary Barnidge
+Demaryius Thomas
+Broncos
+
+Yahoo Team 1
+Darren McFadden
+Matt Cassel
+James Starks
+Randall Cobb
+Mike Evans
+Odell Beckham 
+Jordan Matthews
+Bengals			  
+Jason Witten
+
+Yahoo Team 2
+Blake Bortles
+DeAngelo Williams
+James Starks
+Allen Robinson
+Martellus Bennett
+Davante Adams
+Charcandrick West
+Ravens
+Kenny Britt
+
+Yahoo Team 3
+Kirk Cousins
+Darren McFadden
+Jeremy Langford
+DeMarco Murray
+Rob Gronkowski
+Pierre Garcon
+Harry Douglas
+Bears
+Jermaine Kearse
+
+Yahoo Team 4
+Matthew Stafford
+Darren McFadden
+Jeremy Langford
+Panthers
+James Starks
+Travis Benjamin
+Martellus Bennett
+Calvin Johnson
+Dorial Green-Beckham
+
+
+
+Yahoo Team 5
+Peyton Manning

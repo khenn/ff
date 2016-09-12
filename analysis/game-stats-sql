@@ -1,0 +1,33 @@
+select
+	game,
+	team,
+	opp,
+	week,
+	pointsScored,
+	result
+from (
+select
+	mnemonic as 'game',
+	week,
+	homeTeamId as 'team',
+	awayTeamId as 'opp',
+	hScore as 'pointsScored',
+	if(hScore = 0 and aScore = 0,"",if(hScore > aScore,"W",if(hScore = aScore,"T","L"))) as 'result',
+	gametime
+from
+	nfl_schedule
+UNION
+select
+	mnemonic as 'game',
+	week,
+	awayTeamId as 'team',
+	homeTeamId as 'opp',
+	aScore as 'pointsScored',
+	if(hScore = 0 and aScore = 0,"",if(aScore > hScore,"W",if(aScore = hScore,"T","L"))) as 'result',
+	gametime
+from
+	nfl_schedule
+) as schedule
+order by week, gametime, game
+	
+	

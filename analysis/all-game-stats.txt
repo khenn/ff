@@ -1,0 +1,74 @@
+select 
+	team,
+	sum(PaAtt) as 'PaAtt',
+	max(PaAtt) as 'MaxPaAtt',
+	min(PaAtt) as 'MinPaAtt',
+	sum(RuAtt) as 'RuAtt',
+	max(RuAtt) as 'MaxRuAtt',
+	min(RuAtt) as 'MinRuAtt',
+	sum(fgAtt) as 'FgAtt',
+	max(fgAtt) as 'MaxFgAtt',
+	min(fgAtt) as 'MinFgAtt',
+	sum(xpAtt) as 'xpAtt',
+	max(xpAtt) as 'MaxXpAtt',
+	min(xpAtt) as 'MinXpAtt',
+	sum(RuTD) as 'RuTD',
+	max(RuTD) as 'MaxRuTD',
+	min(RuTD) as 'MinRuTD',
+	sum(Ru2pt) as 'Ru2pt',
+	max(Ru2pt) as 'MaxRu2pt',
+	min(Ru2pt) as 'MinRu2pt',
+	sum(PaTD) as 'PaTD',
+	max(PaTD) as 'MaxPaTD',
+	min(PaTD) as 'MinPaTD',
+	sum(Pa2pt) as 'Pa2pt',
+	max(Pa2pt) as 'MaxPa2pt',
+	min(Pa2pt) as 'MinPa2pt',
+	sum(fg) as 'fg',
+	max(fg) as 'MaxFg',
+	min(fg) as 'MinFg',
+	sum(xp) as 'xp',
+	max(xp) as 'MaxXp',
+	min(xp) as 'MinXp'
+from (
+
+select
+	ns.mnemonic as 'g_mnemonic',
+	ns.week as 'week',
+	ns.awayTeamId as 'team',
+	(select sum(att) from nfl_passing_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'PaAtt',
+	(select sum(td) from nfl_passing_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'PaTD',
+	(select sum(`2pt`) from nfl_passing_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'Pa2pt',
+	(select sum(att) from nfl_rushing_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'RuAtt',
+	(select sum(td) from nfl_rushing_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'RuTD',
+	(select sum(`2pt`) from nfl_rushing_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'Ru2pt',
+	(select sum(xpAtt) from nfl_kicker_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'xpAtt',
+	(select sum(xp) from nfl_kicker_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'xp',
+	(select sum(fgAtt) from nfl_kicker_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'fgAtt',
+	(select sum((fg3pt + fg4pt + fg5pt)) from nfl_kicker_stats where teamId=ns.homeTeamId and gameId=ns.gameId) as 'fg'
+from
+	nfl_schedule ns
+	
+UNION
+
+select
+	ns.mnemonic as 'g_mnemonic',
+	ns.week as 'week',
+	ns.homeTeamId as 'team',
+	(select sum(att) from nfl_passing_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'PaAtt',
+	(select sum(td) from nfl_passing_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'PaTD',
+	(select sum(`2pt`) from nfl_passing_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'Pa2pt',
+	(select sum(att) from nfl_rushing_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'RuAtt',
+	(select sum(td) from nfl_rushing_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'RuTD',
+	(select sum(`2pt`) from nfl_rushing_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'Ru2pt',
+	(select sum(xpAtt) from nfl_kicker_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'xpAtt',
+	(select sum(xp) from nfl_kicker_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'xp',
+	(select sum(fgAtt) from nfl_kicker_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'fgAtt',
+	(select sum((fg3pt + fg4pt + fg5pt)) from nfl_kicker_stats where teamId=ns.awayTeamId and gameId=ns.gameId) as 'fg'
+from
+	nfl_schedule ns
+) as games
+where
+	week < 8
+group by team
+order by team
