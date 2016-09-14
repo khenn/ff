@@ -1,5 +1,12 @@
 #!/opt/local/bin/perl -l
+
+BEGIN { push @INC, '/data/fantasyfootball/lib' }
+
 use strict;
+
+############################
+#  Need to redo next year - switch to ESPN.  Code below updates existing table.  Needs to be rewritten to load
+############################
 
 use HTML::Tree;
 use LWP::Simple;
@@ -7,6 +14,9 @@ use Data::Dumper;
 use DBI;
 use Getopt::Long;
 use Date::Format;
+use FF;
+use FF::SQL;
+
 
 my $remote = '';
 
@@ -28,125 +38,76 @@ if($remote) {
     #$dbh = DBI->connect($dbi,'frank','dri8kei') or die "Connection Error: $DBI::errstr\n";
 }
 
-my $dbh = DBI->connect($dbi,$user,$pwd) or die "Connection Error: $DBI::errstr\n";
+my $db = FF::SQL->connect($dbi,$user,$pwd) or die "Connection Error: $DBI::errstr\n";
+my $ff = FF->new();
+
+
+#my $dbh = DBI->connect($dbi,$user,$pwd) or die "Connection Error: $DBI::errstr\n";
 
 #Get the CBS Page we want to retrieve
-my $cbsbase = q{http://www.cbssports.com/nfl/schedules/regular/2016/week};
+my $baseurl = q{http://www.espn.com/nfl/schedule/_/week/};
 
 
 foreach (1..17) {
     my $week = $_;
     #Page is the cbs base page with 1 through 17 concatenated.
-    my $page = $cbsbase.$week;
+    my $page = $baseurl.$week;
     
     #Load the content
     my $content = get($page);
     my $tree = HTML::Tree->new();
     $tree->parse($content);
     
-    #Clean up - Delete old data
-    delete_row("delete from nfl_schedule where week=?",$week);
+    #Clean up - Delete old data - will want to do this next year
+    #delete_row("delete from nfl_schedule where week=?",$week);
     
     print "################################  Week $week    ###############";
     
     #Load the game data
     my @games = $tree->look_down(
         _tag  => q{tr},
-        class => qr/row1|row2/
+        class => qr/odd|even/
     );
     
     foreach my $game (@games) {
-    
-        #Get the td with all the data in it
-        my $td       = ($game->look_down( _tag => q{td} ))[1];
-        #Get the link
-        my $a        = $td->look_down( _tag=>q{a});
-        #Link has info we need, parse it
-        my $link     = $a->attr('href');
         
-        my $span     = $a->look_down( _tag => q{span} );
+        next if($game->attr('class') =~ /byeweek/);
         
-        my $time     = "1473381000";
-        if( $span ) {
-            $time     = $span->attr('data-gmt');
-        }
-        
-        $link        =~ /\/nfl\/gametracker\/NFL_(\d+)_(\w+)@(\w+)/;
-        my $mnemonic = "NFL_$1_$2".'@'.$3;
-        
-        
-        #http://www.cbssports.com//nfl/gametracker/NFL_20160908_CAR@DEN
-        my @gameData = ();
-        push @gameData, '1', $week, '2016',$mnemonic,$3,$2,time2str('%Y-%m-%d %X',($time+3600));
-        
-        print Dumper(@gameData);
-    
-        #Insert into the passing stats
-        insert_row(q{
-                insert into nfl_schedule
-                (gameId, week, season, mnemonic, homeTeamId, awayTeamId, gameTime)
-                values
-                (?,?,?,?,?,?,?)
-            },
-            @gameData
+        #Get the home team
+        my $homeTeam = $ff->getAbbrv(
+            $game->look_down(
+                _tag  => q{td},
+                class => q{home}
+            )->look_down(
+                _tag  => q{abbr}
+            )->as_trimmed_text
         );
+        
+        #Get the espn gameId
+        my $td   = ($game->look_down( _tag => q{td} ))[2];
+        my $a    = $td->look_down( _tag => q{a} );
+        my $link = $a->attr('href');
+        $link =~ /\?gameId=(\d+)/;
+        
+        my $id = $1;
+        
+        #print qq{update nfl_schedule set id='$id' where week='$week' and homeTeamId='$homeTeam'};
+        
+        $db->update_row(
+            q{update nfl_schedule set gameId=? where week=? and homeTeamId=?},
+            $id, $week, $homeTeam
+        );
+        
+        #Insert into the passing stats
+        #insert_row(q{
+        #        insert into nfl_schedule
+        #        (gameId, week, season, mnemonic, homeTeamId, awayTeamId, gameTime)
+        #        values
+        #        (?,?,?,?,?,?,?)
+        #    },
+        #    @gameData
+        #);
     
     }
     
 }
-
-
-
-#----------------------------------------------------------------------------------------------
-#                                       Methods
-#----------------------------------------------------------------------------------------------
-
-sub fetchrow_array {
-    my $sql = shift;
-    my @params = @_;
-    
-    my $sth = $dbh->prepare($sql);
-    $sth->execute(@params);
-    my @result = $sth->fetchrow_array();
-    $sth->finish;
-    
-    return \@result;
-}
-
-sub fetchall_arrayref {
-    my $sql = shift;
-    my @params = @_;
-    
-    my $sth = $dbh->prepare($sql);
-    $sth->execute(@params);
-    my $result = $sth->fetchall_arrayref([]);
-    $sth->finish;
-    
-    return $result;
-}
-
-
-sub delete_row {
-    insert_row(@_);
-}
-
-sub update_row {
-    insert_row(@_);
-}
-
-sub insert_row {
-    my $sql = shift;
-    my @params = @_;
-    
-    my $sth = $dbh->prepare($sql);
-    $sth->execute(@params);
-    $sth->finish;
-    
-}
-
-sub trim {
-    my $str = shift;
-    $str =~ s/^\s+|\s+$//g;
-    return $str;
-}
-
